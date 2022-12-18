@@ -12,12 +12,13 @@ public class CharacterMovementHandler : NetworkBehaviour
 
     //Ohter components
     NetworkCharacterControllerPrototypeCustom networkCharacterControllerPrototypeCustom;
-    Camera localCamera;
+    //Camera localCamera;
 
     public void Awake()
     {
         networkCharacterControllerPrototypeCustom = GetComponent<NetworkCharacterControllerPrototypeCustom>();
-        localCamera = GetComponentInChildren<Camera>();
+        //localCamera = GetComponentInChildren<Camera>();
+        //localCamera.enabled = true;
     }
 
     // Start is called before the first frame update
@@ -33,7 +34,7 @@ public class CharacterMovementHandler : NetworkBehaviour
         cameraRotationX += viewInput.y * Time.deltaTime * networkCharacterControllerPrototypeCustom.viewUpDownRotationSpeed;
         cameraRotationX = Mathf.Clamp(cameraRotationX, -90, 90);//restringimos los movimientos de la rotación de la cámara
 
-        localCamera.transform.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
+        //localCamera.transform.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
     }
 
     public override void FixedUpdateNetwork()
