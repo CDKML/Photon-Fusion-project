@@ -23,11 +23,14 @@ public class NetworkRunnerHandler : MonoBehaviour
 
     protected virtual Task InitializeNetworkRunner(NetworkRunner runner, GameMode gameMode, NetAddress address, SceneRef scene, Action<NetworkRunner> initialized)
     {
-        var sceneManager = runner.GetComponent(typeof(MonoBehaviour)) as INetworkSceneManager;
-        if(sceneManager == null)
+        var sceneManager = runner.GetComponents(typeof(MonoBehaviour)).OfType<INetworkSceneManager>().FirstOrDefault();
+
+        if (sceneManager == null)
         {
-            sceneManager = runner.GetComponent<NetworkSceneManagerDefault>();
+            Debug.Log($"NetworkRunner does not have any component implementing {nameof(INetworkSceneManager)} interface, adding {nameof(NetworkSceneManagerDefault)}.", runner);
+            sceneManager = runner.gameObject.AddComponent<NetworkSceneManagerDefault>();
         }
+
         runner.ProvideInput = true;
         return runner.StartGame(new StartGameArgs
         {
