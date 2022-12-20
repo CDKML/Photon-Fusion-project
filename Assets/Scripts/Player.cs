@@ -5,15 +5,6 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour, IPlayerLeft
 {
-    public void PlayerLeft(PlayerRef player)
-    {
-        if (player == Object.InputAuthority)
-        {
-            Debug.Log("Player left...");
-            Runner.Despawn(Object);
-        }
-    }
-
     public static Player Local { get; set; }
 
     // Update is called once per frame
@@ -44,5 +35,12 @@ public class Player : NetworkBehaviour, IPlayerLeft
         //Make it easier to tell which player is which.
         transform.name = $"Player_{Object.Id}";
     }
-
+    public void PlayerLeft(PlayerRef player)
+    {
+        if (player == Object.InputAuthority)
+        {
+            Debug.Log("Player left...");
+            Runner.Despawn(Object);
+        }
+    }
 }
