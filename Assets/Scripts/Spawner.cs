@@ -7,7 +7,7 @@ using UnityEngine;
 public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField]
-    private Player _playerPrefab;
+    private NetworkPlayer _playerPrefab;
 
     //Other component
     CharacterInputHandler characterInputHandler;
@@ -33,9 +33,9 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        if (characterInputHandler == null && Player.Local != null)
+        if (characterInputHandler == null && NetworkPlayer.Local != null)
         {
-            characterInputHandler = Player.Local.GetComponent<CharacterInputHandler>();
+            characterInputHandler = NetworkPlayer.Local.GetComponent<CharacterInputHandler>();
         }
 
         if (characterInputHandler != null)
