@@ -1,14 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Fusion;
 using Fusion.Sockets;
 using System;
-using UnityEngine.Diagnostics;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 {
-    public NetworkPlayer playerPrefab;
+    [SerializeField]
+    private Player _playerPrefab;
 
     //Other component
     CharacterInputHandler characterInputHandler;
@@ -24,7 +23,7 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         if (runner.IsServer)
         {
             Debug.Log("OnPlayerJoined we are server. Spawning player");
-            runner.Spawn(playerPrefab, Utils.GetRandomSpawnPoint(), Quaternion.identity, player);
+            runner.Spawn(_playerPrefab, Utils.GetUniqueSpawnPoint(runner, player), Quaternion.identity, player);
         }
         else
         {
@@ -34,15 +33,20 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        if (characterInputHandler == null && NetworkPlayer.Local != null)
+        if (characterInputHandler == null && Player.Local != null)
         {
-            characterInputHandler = NetworkPlayer.Local.GetComponent<CharacterInputHandler>();
+            characterInputHandler = Player.Local.GetComponent<CharacterInputHandler>();
         }
 
         if (characterInputHandler != null)
         {
             input.Set(characterInputHandler.GetNetworkInput());
         }
+    }
+
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        Debug.Log("OnPlayerLeft");
     }
 
     public void OnConnectedToServer(NetworkRunner runner)
@@ -78,11 +82,6 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
     {
         Debug.Log("OnInputMissing");
-    }
-
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
-    {
-        Debug.Log("OnPlayerLeft");
     }
 
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data)

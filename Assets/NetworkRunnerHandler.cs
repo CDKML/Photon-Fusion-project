@@ -17,11 +17,11 @@ public class NetworkRunnerHandler : MonoBehaviour
     {
         networkRunner = Instantiate(networkRunnerPrefab);
         networkRunner.name = "Network Runner";
-        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.AutoHostOrClient, NetAddress.Any(), SceneManager.GetActiveScene().buildIndex, null);
+        InitializeNetworkRunner(networkRunner, GameMode.AutoHostOrClient, NetAddress.Any(), SceneManager.GetActiveScene().buildIndex, null);
         Debug.Log("Server NetworkRunner started");
     }
 
-    protected virtual Task InitializeNetworkRunner(NetworkRunner runner, GameMode gameMode, NetAddress address, SceneRef scene, Action<NetworkRunner> initialized)
+    protected virtual void InitializeNetworkRunner(NetworkRunner runner, GameMode gameMode, NetAddress address, SceneRef scene, Action<NetworkRunner> initialized)
     {
         var sceneManager = runner.GetComponents(typeof(MonoBehaviour)).OfType<INetworkSceneManager>().FirstOrDefault();
 
@@ -32,7 +32,12 @@ public class NetworkRunnerHandler : MonoBehaviour
         }
 
         runner.ProvideInput = true;
-        return runner.StartGame(new StartGameArgs
+        StartGame(runner, gameMode, address, scene, initialized, sceneManager);
+    }
+
+    private async void StartGame(NetworkRunner runner, GameMode gameMode, NetAddress address, SceneRef scene, Action<NetworkRunner> initialized, INetworkSceneManager sceneManager)
+    {
+        await runner.StartGame(new StartGameArgs()
         {
             GameMode = gameMode,
             Address = address,
