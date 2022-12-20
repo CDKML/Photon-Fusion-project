@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class CharacterInputHandler : MonoBehaviour
 {
-    Vector2 moveInputVector = Vector2.zero;
-    Vector2 viewInputVector = Vector2.zero;
+    Vector3 moveInputVector = Vector3.zero;
+    Vector3 viewInputVector = Vector3.zero;
     bool isJumpButtonPressed = false;
 
     //Other components
-    CharacterMovementHandler characterMovementHandler;
+    LocalCameraHandler localCameraHandler;
 
-    public void Awake()
+    private void Awake()
     {
-        characterMovementHandler = GetComponent<CharacterMovementHandler>();
+        localCameraHandler = GetComponentInChildren<LocalCameraHandler>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.None;
         Cursor.visible = false;
     }
 
@@ -28,29 +28,37 @@ public class CharacterInputHandler : MonoBehaviour
     {
         //View input
         viewInputVector.x = Input.GetAxis("Mouse X");
-        viewInputVector.y = Input.GetAxis("Mouse Y") * -1; //Invert mouse look
-
-        characterMovementHandler.SetViewInputVector(viewInputVector);
+        viewInputVector.z = Input.GetAxis("Mouse Y") * -1; //Invert mouse look
 
         //Move input
         moveInputVector.x = Input.GetAxis("Horizontal");
-        moveInputVector.y = Input.GetAxis("Vertical");
+        moveInputVector.z = Input.GetAxis("Vertical");
 
-        isJumpButtonPressed = Input.GetButtonDown("Jump");
+        //Jump
+        if (Input.GetButtonDown("Jump"))
+        {
+            isJumpButtonPressed = true;
+        }
+
+        //Set view
+        localCameraHandler.SetViewInputVector(viewInputVector);
     }
 
     public NetworkInputData GetNetworkInput()
     {
         NetworkInputData networkInputData = new NetworkInputData();
 
-        //View data
-        networkInputData.rotationInput = viewInputVector.x;
+        //Aim data
+        networkInputData.aimForwardVector = localCameraHandler.transform.forward;
 
         //Move data
-        networkInputData.movementInput = moveInputVector;
+        networkInputData.direction = moveInputVector;
 
         //Jump data
         networkInputData.isJumpPressed = isJumpButtonPressed;
+
+        //Reset variables now that we have read their states
+        isJumpButtonPressed = false;
 
         return networkInputData;
     }

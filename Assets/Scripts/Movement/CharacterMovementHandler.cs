@@ -5,47 +5,28 @@ using UnityEngine;
 
 public class CharacterMovementHandler : NetworkBehaviour
 {
-    Vector2 viewInput;
-
-    //Rotation 
-    float cameraRotationX = 0;
-
     //Ohter components
     NetworkCharacterControllerPrototypeCustom networkCharacterControllerPrototypeCustom;
-    //Camera localCamera;
 
-    public void Awake()
+    private void Awake()
     {
         networkCharacterControllerPrototypeCustom = GetComponent<NetworkCharacterControllerPrototypeCustom>();
-        //localCamera = GetComponentInChildren<Camera>();
-        //localCamera.enabled = true;
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
-
-    //Update is called once per frame
-    private void Update()
-    {
-        cameraRotationX += viewInput.y * Time.deltaTime * networkCharacterControllerPrototypeCustom.viewUpDownRotationSpeed;
-        cameraRotationX = Mathf.Clamp(cameraRotationX, -90, 90);//restringimos los movimientos de la rotación de la cámara
-
-        //localCamera.transform.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
     }
 
     public override void FixedUpdateNetwork()
     {
         if (GetInput(out NetworkInputData networkInputData))
         {
-            //Rotate the view
-            networkCharacterControllerPrototypeCustom.Rotate(networkInputData.rotationInput);
+            //Rotate the transform according to the client aim vector
+            transform.forward = networkInputData.aimForwardVector;
+
+            //Cancel out rotation on X axis as we don't want our character to tilt
+            Quaternion rotation = transform.rotation;
+            rotation.eulerAngles = new Vector3(0, rotation.eulerAngles.y, rotation.eulerAngles.z);
+            transform.rotation = rotation;
 
             //Move
-            Vector3 moveDirection = transform.forward * networkInputData.movementInput.y + transform.right * networkInputData.movementInput.x;
+            Vector3 moveDirection = transform.forward * networkInputData.direction.z + transform.right * networkInputData.direction.x;
             moveDirection.Normalize();
 
             networkCharacterControllerPrototypeCustom.Move(moveDirection);
@@ -55,10 +36,15 @@ public class CharacterMovementHandler : NetworkBehaviour
             {
                 networkCharacterControllerPrototypeCustom.Jump();
             }
+
+            //Check if we've fallen off the world.
+            CheckFallRespawn();
         }
     }
-    public void SetViewInputVector(Vector2 viewInput)
+
+    void CheckFallRespawn()
     {
-        this.viewInput = viewInput;
+        if (transform.position.y < -12)
+            transform.position = Utils.GetRandomSpawnPoint();
     }
 }
