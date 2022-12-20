@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : NetworkBehaviour, IPlayerLeft
+public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
 {
-    public static Player Local { get; set; }
+    public static NetworkPlayer Local { get; set; }
 
     // Update is called once per frame
     public override void Spawned()
